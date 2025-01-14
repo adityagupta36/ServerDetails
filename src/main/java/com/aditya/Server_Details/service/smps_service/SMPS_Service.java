@@ -116,6 +116,7 @@ public class SMPS_Service {
                         .replace("<mem_util_max>", String.valueOf(Long.parseLong(String.valueOf(memMax))));
             }
 
+
             if (totalCpu != null && totalMem != null) {
 
                 if ((totalCpu < cpuMin || totalCpu > cpuMax) || (totalMem < memMin || totalMem > memMax)) {
@@ -185,6 +186,7 @@ public class SMPS_Service {
         BufferedReader br = new BufferedReader(isr);
 
 
+        Thread.sleep(5000);
 
         File textFile = new File(batchFileText);
 
@@ -226,7 +228,6 @@ public class SMPS_Service {
         ArrayList<ServerListDetail> serverListDetails = new ArrayList<>();
 
         List<OSProcess> processList  = filterListOfBatchText(batchFileTotalProcessesList);
-
 
         for (String targetProcess : findListOfSpecificProcessFromServerMasterDB()){
 
