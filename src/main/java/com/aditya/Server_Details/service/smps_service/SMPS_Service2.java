@@ -49,6 +49,10 @@ public class SMPS_Service2 {
     @Value("${toEmail}")
     String toEmail;
 
+    @Value("${serverName}")
+    String serverName;
+    static Integer countOfServerDetailsList=0;
+
     List<String> findListOfSpecificProcessFromServerMasterDB(){
         List<String> targetProcesses = smrRepo.findListOfSpecificProcess();
         return targetProcesses;
@@ -72,9 +76,7 @@ public class SMPS_Service2 {
     List<String> findByEmailBodyModel(){
         return smrRepo.findByEmailBodyModel();
     }
-    String findServerName(){
-        return smrRepo.findServerName();
-    }
+
 
 
 
@@ -90,7 +92,7 @@ public class SMPS_Service2 {
         Double totalCpu;
         Long totalMem;
 
-        for ( int i = 0 ; i< serverListDetails.size() ; i++) {
+        for ( int i = 0 ; i<countOfServerDetailsList ; i++) {
 
             cpuMin = findCpuUtilMin().get(i);
             cpuMax = findCpuUtilMax().get(i);
@@ -101,15 +103,20 @@ public class SMPS_Service2 {
 
             totalCpu = serverListDetails.get(i).getCpuUtilizationTotal();
             totalMem = serverListDetails.get(i).getMemoryUtilizationTotal();
-            if(mailBody!=null){
-                mailBody = findByEmailBodyModel().get(i)
-                        .replace("<process_name>", serverListDetails.get(i).getProcessName())
-                        .replace("<total_cpu_utilization>", String.valueOf(Double.parseDouble(String.valueOf(totalCpu))))
-                        .replace("<cpu_util_min>", String.valueOf(Double.parseDouble(String.valueOf(cpuMin))))
-                        .replace("<cpu_util_max>", String.valueOf(Double.parseDouble(String.valueOf(cpuMax))))
-                        .replace("<total_mem_utilization>",String.valueOf(Long.parseLong(String.valueOf(totalMem))))
-                        .replace("<mem_util_min>", String.valueOf(Long.parseLong(String.valueOf(memMin))))
-                        .replace("<mem_util_max>", String.valueOf(Long.parseLong(String.valueOf(memMax))));
+            try{
+                if(mailBody!=null){
+                    mailBody = findByEmailBodyModel().get(i)
+                            .replace("<process_name>", serverListDetails.get(i).getProcessName())
+                            .replace("<total_cpu_utilization>", String.valueOf(Double.parseDouble(String.valueOf(totalCpu))))
+                            .replace("<cpu_util_min>", String.valueOf(Double.parseDouble(String.valueOf(cpuMin))))
+                            .replace("<cpu_util_max>", String.valueOf(Double.parseDouble(String.valueOf(cpuMax))))
+                            .replace("<total_mem_utilization>",String.valueOf(Long.parseLong(String.valueOf(totalMem))))
+                            .replace("<mem_util_min>", String.valueOf(Long.parseLong(String.valueOf(memMin))))
+                            .replace("<mem_util_max>", String.valueOf(Long.parseLong(String.valueOf(memMax))));
+                }
+            }
+            catch (NullPointerException e){
+
             }
 
             if (totalCpu != null && totalMem != null) {
@@ -204,10 +211,13 @@ public class SMPS_Service2 {
 
         for (String targetProcess : findListOfSpecificProcessFromServerMasterDB()){
 
-            ServerListDetail sld = new ServerListDetail();
+            ServerListDetail sld = null;
             for (OSProcess totalProcessesList : processList){
 
                 if (totalProcessesList.getCommandLine().contains(targetProcess)){
+                    if (sld==null){
+                        sld = new ServerListDetail();
+                    }
                     cpuUtil = cpuUtil + totalProcessesList.getProcessCpuLoadBetweenTicks(totalProcessesList)*100;  //%
                     memUtil = memUtil + (totalProcessesList.getResidentSetSize()/(1024L * 1024L) );   //mb
                     processId = totalProcessesList.getProcessID();
@@ -219,12 +229,16 @@ public class SMPS_Service2 {
                 }
             }
 
-            serverListDetails.add(sld);
-            sldRepo.save(sld);
+
+                if (sld!=null){
+                    serverListDetails.add(sld);
+                    countOfServerDetailsList++;
+                    sldRepo.save(sld);
+                }
         }
 
         ServerListDetail server = new ServerListDetail();
-        server.setProcessName(findServerName());
+        server.setProcessName("Server");
         server.setCpuUtilizationTotal(cpuUtilization);  //%
         server.setMemoryUtilizationTotal(usedMemoryMB); //mb
 

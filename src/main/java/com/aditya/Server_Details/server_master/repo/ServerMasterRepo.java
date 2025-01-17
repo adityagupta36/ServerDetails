@@ -29,8 +29,6 @@ public interface ServerMasterRepo extends JpaRepository<ServerMaster, Integer> {
     @Query(value = "SELECT email_body_model FROM server_master", nativeQuery = true)
     List<String> findByEmailBodyModel();
 
-    @Query(value = "SELECT process_name FROM server_master WHERE process_name='Server'", nativeQuery = true )
-    String findServerName();
 
 
 

@@ -75,9 +75,9 @@ public class SMPS_Service1 {
     List<String> findByEmailBodyModel(){
         return smrRepo.findByEmailBodyModel();
     }
-    String findServerName(){
-        return smrRepo.findServerName();
-    }
+//    String findServerName(){
+//        return smrRepo.findServerName();
+//    }
 
 
 
@@ -252,7 +252,7 @@ public class SMPS_Service1 {
         }
 
         ServerListDetail server = new ServerListDetail();
-        server.setProcessName(findServerName());
+        server.setProcessName("Server");
         server.setCpuUtilizationTotal(cpuUtilization);  //%
         server.setMemoryUtilizationTotal(usedMemoryMB); //mb
 
