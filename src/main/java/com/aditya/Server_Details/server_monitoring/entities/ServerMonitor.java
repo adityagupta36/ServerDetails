@@ -25,5 +25,4 @@ public class ServerMonitor {
     @OneToMany(mappedBy = "serverMonitor", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ServerListDetail> serverListDetails;
 
-
 }

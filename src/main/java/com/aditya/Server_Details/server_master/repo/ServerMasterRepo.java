@@ -30,8 +30,5 @@ public interface ServerMasterRepo extends JpaRepository<ServerMaster, Integer> {
     List<String> findByEmailBodyModel();
 
 
-
-
-
 }
 

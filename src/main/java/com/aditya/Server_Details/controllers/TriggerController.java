@@ -18,6 +18,7 @@ public class TriggerController {
 
     @GetMapping()
     public String runOs() throws IOException, InterruptedException, NullPointerException {
+//        smpsService.calculateDiskSpace();
         smpsService.runBatchFile();
         return "Processed!";
     }

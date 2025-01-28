@@ -47,11 +47,6 @@ public class SMPS_Service1 {
     @Value("${toEmail}")
     String toEmail;
 
-//    String toEmail = "guptaaditya9728@gmail.com";
-
-
-
-
     List<String> findListOfSpecificProcessFromServerMasterDB(){
         List<String> targetProcesses = smrRepo.findListOfSpecificProcess();
         return targetProcesses;
@@ -75,11 +70,6 @@ public class SMPS_Service1 {
     List<String> findByEmailBodyModel(){
         return smrRepo.findByEmailBodyModel();
     }
-//    String findServerName(){
-//        return smrRepo.findServerName();
-//    }
-
-
 
 
     public void sendEmail(ArrayList<ServerListDetail> serverListDetails){
@@ -214,7 +204,7 @@ public class SMPS_Service1 {
 
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
         long[] prevTicks = processor.getSystemCpuLoadTicks();
-        Thread.sleep(1000);  // 1 second delay
+        Thread.sleep(2000);  // 1 second delay
         long[] ticks = processor.getSystemCpuLoadTicks();
         long totalTicks = 0;
         long idleTicks = ticks[CentralProcessor.TickType.IDLE.getIndex()] - prevTicks[CentralProcessor.TickType.IDLE.getIndex()];

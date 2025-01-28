@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.function.LongToDoubleFunction;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -17,6 +19,8 @@ public class ServerListDetail {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer pId;
 
+
+
     private Integer processId;
 
     private String processName;
@@ -24,6 +28,10 @@ public class ServerListDetail {
     private Double cpuUtilizationTotal;
 
     private Long memoryUtilizationTotal;
+
+    private Double specificDriveStorage;
+
+    private Double specificDriveFreeStorage;
 
     @JoinColumn(name = "serverMonitorFK")
     @ManyToOne(fetch = FetchType.LAZY)
