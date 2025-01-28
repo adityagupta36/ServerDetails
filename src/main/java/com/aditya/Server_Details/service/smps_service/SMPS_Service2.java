@@ -20,13 +20,10 @@ import oshi.software.os.FileSystem;
 import oshi.software.os.OSFileStore;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
-import oshi.util.GlobalConfig;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -99,23 +96,29 @@ public class SMPS_Service2 {
 
 
 
-    public void calculateDiskStorage(){
+    public List<ServerListDetail> calculateDiskStorage(){
         SystemInfo systemInfo = new SystemInfo();
         FileSystem fileSystem = systemInfo.getOperatingSystem().getFileSystem();
+        List<ServerListDetail> list = new ArrayList<>();
 
         for (OSFileStore fileStore : fileSystem.getFileStores()) {
             String driveName = fileStore.getMount();
             Double totalSpace = fileStore.getTotalSpace()/(1024D*1024D*1024D);
             Double freeSpace = fileStore.getUsableSpace()/(1024D*1024D*1024D);
 
-            if (driveName.startsWith("C") || driveName.startsWith("D") || driveName.startsWith("E")) {
+            if (driveName.startsWith("C") || driveName.startsWith("D") || driveName.startsWith("E") || driveName.startsWith("F")) {
                 ServerListDetail server = new ServerListDetail();
                 server.setProcessName(driveName);
                 server.setSpecificDriveStorage(totalSpace);
                 server.setSpecificDriveFreeStorage(freeSpace);
+                server.setCpuUtilizationTotal(0.0);
+                server.setMemoryUtilizationTotal(0L);
+                server.setProcessId(0);
                 sldRepo.save(server);
+                list.add(server);
             }
         }
+        return list;
     }
 
 
@@ -167,13 +170,17 @@ public class SMPS_Service2 {
 
 
 
-    public void saveProcessMaster(List<ServerListDetail> serverListDetails){
+    public void saveProcessMaster(List<ServerListDetail> serverListDetails, List<ServerListDetail> listDetails){
         ServerMonitor serverMonitor = new ServerMonitor();
         serverMonitor.setLocalDateTime(LocalDateTime.now());
         for (ServerListDetail serverListDetail : serverListDetails){
             serverListDetail.setServerMonitor(serverMonitor);
         }
+        for (ServerListDetail serverListDetail : listDetails){
+            serverListDetail.setServerMonitor(serverMonitor);
+        }
         serverMonitor.setServerListDetails(serverListDetails);
+        serverMonitor.setServerListDetails(listDetails);
         smr.save(serverMonitor);
     }
 
@@ -259,6 +266,8 @@ public class SMPS_Service2 {
                     sld.setMemoryUtilizationTotal(memUtil);
                     sld.setProcessId(processId);
                     sld.setProcessName(targetProcess);
+                    sld.setSpecificDriveStorage(0.0D);
+                    sld.setSpecificDriveFreeStorage(0.0D);
 //
 //                    logger.error("After: Target Process: {}, CPU Utilization: {}%, Memory Utilization: {} MB", targetProcess, sld.getCpuUtilizationTotal(), sld.getMemoryUtilizationTotal());
 //                    logger.error("After: Target Process: {}, CPU Utilization: {}%, Memory Utilization: {} MB",sld.getProcessId(), sld.getCpuUtilizationTotal(), sld.getMemoryUtilizationTotal());
@@ -276,10 +285,13 @@ public class SMPS_Service2 {
         server.setProcessName("Server");
         server.setCpuUtilizationTotal(cpuUtilization);  //%
         server.setMemoryUtilizationTotal(usedMemoryMB); //mb
+        server.setSpecificDriveStorage(0.0);
+        server.setSpecificDriveFreeStorage(0.0);
         serverListDetails.add(server);
+        server.setProcessId(0);
         sldRepo.save(server);
-        calculateDiskStorage();
-        saveProcessMaster(serverListDetails);
+        saveProcessMaster(serverListDetails, calculateDiskStorage());
+
         sendEmail(serverListDetails);
     }
 
